@@ -1,33 +1,51 @@
 var nextTick = require('next-tick')
+var isNil = require('is-nil')
+var once = require('call-once')
 
-var ensureAsync = function (fn) {
+var wrap = function (wrapper, fn) {
   return function () {
     var args = arguments
-    nextTick(function () {
-      fn.apply(undefined, args)
+    return wrapper(function () {
+      return fn.apply(undefined, args)
     })
   }
 }
 
-var concurrent = function (fns, finalCb) {
+var ensureAsync = function (fn) {
+  return wrap(nextTick, fn)
+}
+
+/*var ensureAsync = function (fn) {
+  return function () {
+    var args = arguments
+    return nextTick(function () {
+      return fn.apply(undefined, args)
+    })
+  }
+}*/
+
+var concurrent = function (functions, finalCb) {
   var completed = 0
   var results = []
-  var firstErr
-  var cleanupFns = fns.map(function (fn, idx) {
+  var errors = []
+  var hasErr = false
+  var cleanupFns = functions.map(function (fn, idx) {
     var fnCb = function (err, result) {
-      if (firstErr === undefined && err !== undefined) {
-        firstErr = err
+      if (!hasErr && !isNil(err)) {
+        hasErr = true
         cleanupFns.forEach(function (fn) {
           fn()
         })
       }
       ++completed
+      errors[idx] = err
       results[idx] = result
-      if (completed === fns.length) {
-        finalCb(firstErr, firstErr === undefined ? results : undefined)
+      if (completed === functions.length) {
+        finalCb(hasErr ? errors : undefined, results)
       }
     }
-    var cleanupFn = fn(ensureAsync(fnCb))
+    var preparedCb = once(ensureAsync(fnCb))
+    var cleanupFn = fn(preparedCb)
     return cleanupFn
   }).filter(function (v) {
     return typeof v === 'function'

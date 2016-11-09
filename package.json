@@ -13,6 +13,9 @@
     "tape": "^4.6.2"
   },
   "dependencies": {
-    "next-tick": "^1.0.0"
+    "call-once": "^1.0.3",
+    "is-nil": "^1.0.1",
+    "next-tick": "^1.0.0",
+    "optional-args": "^2.1.0"
   }
 }

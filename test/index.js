@@ -6,6 +6,7 @@ test('runs functions concurrently', t => {
   const fn = (cb) => setTimeout(() => cb(undefined), 500)
   const startTime = new Date().getTime()
   concurrent([fn, fn, fn, fn], (err, results) => {
+    if (err) { return t.fail(err) }
     const totalTime = new Date().getTime() - startTime
     t.true(totalTime < 1000, `Took: ${totalTime}ms`)
   })
@@ -18,27 +19,19 @@ test('passes ordered results to the callback', t => {
   }
   const expected = ['a', 'b', 'c']
   concurrent(expected.map(v => Fn(v)), (err, results) => {
+    if (err) { return t.fail(err) }
     t.deepEqual(results, expected)
   })
 })
 
-test('passes err to the callback if a function calls cb(err)', t => {
+test('passes errors to the callback if any functions call cb(err)', t => {
   t.plan(1)
   const Fn = (result) => {
     return (cb) => setTimeout(() => cb(undefined, result), 0)
   }
   const errFn = (cb) => cb(123)
   concurrent([Fn('a'), errFn, Fn('c')], (err, results) => {
-    t.equal(err, 123)
-  })
-})
-
-test('no results passed to callback if a function calls cb(err)', t => {
-  t.plan(1)
-  const Fn = (result) => (cb) => cb(undefined, result)
-  const errFn = (cb) => cb(123)
-  concurrent([Fn('a'), Fn('b'), errFn], (err, results) => {
-    t.equal(results, undefined)
+    t.deepEqual(err, [undefined, 123, undefined])
   })
 })
 
@@ -61,7 +54,7 @@ test('calls cleanup functions if a function calls cb(err)', t => {
       }, 500)
     }
   }
-  concurrent([a, b], (err, result) => {})
+  concurrent([a, b], () => {})
 })
 
 test('calls cleanup functions before final callback', t => {
@@ -84,8 +77,8 @@ test('calls cleanup functions before final callback', t => {
       }, 500)
     }
   }
-  concurrent([a, b], (err, result) => {
+  concurrent([a, b], (errors, results) => {
     t.equal(cleanupFnsCalled, 2, 'cleanup fns were called before final callback')
-    t.deepEqual([err, result], ['error', undefined])
+    t.deepEqual(errors, ['error', undefined])
   })
 })
