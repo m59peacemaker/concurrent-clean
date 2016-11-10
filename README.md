@@ -1,5 +1,7 @@
 # concurrent-clean
 
+Executes functions concurrently with opportunity to cleanup if any fail.
+
 ## install
 
 ```sh
@@ -15,12 +17,13 @@ concurrent([
   (cb) => {
     const asyncOperation = foo(cb)
 
-    return () => { // called if any callback is called with err
+    return () => {
+      // called if any other functions encountered errors and `cb` hasn't been called yet
       asyncOperation.cancel(cb)
     }
   },
   (cb) => {
-    const asyncOperation = bar()
+    const asyncOperation = bar(cb)
     return () => {
       asyncOperation.stop(cb)
     }
@@ -33,9 +36,11 @@ concurrent([
 
 ## API
 
-### `concurrent(functions, cb)`
+### `concurrent(functions, [options], cb)`
 
-- `functions: []` array of functions that will be passed a node-style `cb` and be called concurrently
-- `cb: (errors, results) => {}` callback to be called after all functions call their callback.
-  - `errors: undefined or []` undefined if there are no errors or an array if there are.
-  - `results: []` results from each function
+- `functions: []` array of functions that will be passed a node-style `cb` and be called concurrently. Functions can return a cleanup function that will be called if there are any errors so that there is an opportunity to cancel asynchronous operations in other functions. The cleanup function will not be called if the function has already called its callback.
+- `options: object`
+  - `ignoreErrors: boolean, false` when true, cleanup functions will not be called and results will be returned even if there are errors
+- `cb: (errors, results) => {}` callback to be called after all functions call their callback
+  - `errors: undefined or []` undefined if there are no errors or an array if there are
+  - `results: [] or undefined` results from each function unless there are errors

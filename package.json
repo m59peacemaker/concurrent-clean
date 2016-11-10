@@ -1,21 +1,43 @@
 {
   "name": "concurrent-clean",
   "version": "1.0.0",
-  "description": "",
-  "keywords": [],
+  "description": "Executes functions concurrently with opportunity to cleanup if any fail.",
+  "keywords": [
+    "concurrent",
+    "parallel",
+    "function",
+    "call",
+    "calls",
+    "execute",
+    "execution",
+    "run",
+    "cleanup",
+    "cancel",
+    "abort",
+    "callback",
+    "complete",
+    "finish"
+  ],
   "main": "index.js",
   "scripts": {
     "test": "node test"
   },
-  "author": "",
-  "license": "VOL",
-  "devDependencies": {
-    "tape": "^4.6.2"
+  "author": {
+    "name": "Johnny Hauser",
+    "email": "johnnyhauser@gmail.com"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/m59peacemaker/js-concurrent-clean"
+  },
+  "license": "VOL",
   "dependencies": {
     "call-once": "^1.0.3",
     "is-nil": "^1.0.1",
     "next-tick": "^1.0.0",
     "optional-args": "^2.1.0"
+  },
+  "devDependencies": {
+    "tape": "^4.6.2"
   }
 }
