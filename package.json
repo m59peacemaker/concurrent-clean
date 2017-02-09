@@ -1,6 +1,6 @@
 {
   "name": "concurrent-clean",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Executes functions concurrently with opportunity to cleanup if any fail.",
   "keywords": [
     "concurrent",
@@ -30,7 +30,7 @@
     "type": "git",
     "url": "https://github.com/m59peacemaker/js-concurrent-clean"
   },
-  "license": "VOL",
+  "license": "CC0-1.0",
   "dependencies": {
     "call-once": "^1.0.3",
     "is-nil": "^1.0.1",
